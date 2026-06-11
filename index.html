@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Смешарик Спиннер | 9 героев | Плавная остановка</title>
+    <title>Смешарик Спиннер | С картинками</title>
     <style>
         * {
             margin: 0;
@@ -23,14 +23,12 @@
             overflow-x: hidden;
         }
 
-        /* карточка-контейнер */
         .game-container {
             background: rgba(255,248,205,0.88);
             backdrop-filter: blur(4px);
             border-radius: 80px 80px 70px 70px;
             padding: 35px 25px 40px 25px;
             box-shadow: 0 25px 40px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,200,0.8);
-            transition: all 0.2s ease;
         }
 
         .spinner-wrapper {
@@ -48,12 +46,10 @@
             background: radial-gradient(circle at 30% 30%, #ffefb0, #f7d98c);
             border-radius: 50%;
             box-shadow: 0 20px 30px rgba(0,0,0,0.3), inset 0 0 0 8px #ffdfa5, inset 0 0 0 12px #e8b56e;
-            transition: box-shadow 0.2s;
             cursor: pointer;
             will-change: transform;
         }
 
-        /* центральная ось — тоже вращается вместе со спиннером (как настоящий спиннер) */
         .spinner-center {
             position: absolute;
             top: 50%;
@@ -86,7 +82,6 @@
             font-weight: bold;
         }
 
-        /* каждый лепесток — круглый с персонажем */
         .petal {
             position: absolute;
             width: 98px;
@@ -97,19 +92,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.05s ease;
             z-index: 10;
             border: 2px solid #ffcf8a;
+            overflow: hidden;
         }
         
-        .petal svg {
-            width: 88px;
-            height: 88px;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-            transition: transform 0.2s;
+        .petal img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;   /* картинка вписывается в кружок, виден весь персонаж */
+            border-radius: 50%;
+            background: #fff3dd;    /* фон на случай прозрачности */
+            pointer-events: none;
         }
         
-        /* кнопка с характером */
         .btn-spin {
             background: #ffbc6e;
             border: none;
@@ -150,8 +146,8 @@
             padding: 5px 20px;
             backdrop-filter: blur(2px);
         }
-        
-        /* адаптив */
+
+        /* Адаптив */
         @media (max-width: 620px) {
             .spinner {
                 width: 380px;
@@ -160,10 +156,6 @@
             .petal {
                 width: 74px;
                 height: 74px;
-            }
-            .petal svg {
-                width: 66px;
-                height: 66px;
             }
             .spinner-center {
                 width: 74px;
@@ -188,10 +180,6 @@
             .petal {
                 width: 64px;
                 height: 64px;
-            }
-            .petal svg {
-                width: 56px;
-                height: 56px;
             }
             .spinner-center {
                 width: 64px;
@@ -224,342 +212,71 @@
 <div class="game-container">
     <div class="spinner-wrapper">
         <div class="spinner" id="spinner">
-            <!-- лепестки добавятся скриптом -->
             <div class="spinner-center"><span>⚡ КРУТИ!</span></div>
         </div>
     </div>
     <button class="btn-spin" id="spinBtn">🌀 КРУТИТЬ! 🌀</button>
     <div style="display: flex; justify-content: center; margin-top: 14px;">
-        <div class="caption">🍭 9 смешариков | плавная остановка в случайном положении 🍬</div>
+        <div class="caption">🍭 9 смешариков | нажми «Крутить!» — спиннер вращается, ещё раз — плавно останавливается 🍬</div>
     </div>
 </div>
 
 <script>
     (function() {
-        // ---------- 9 персонажей: старые + Ёжик, Пин, Кар-Карыч ----------
+        // ----- Имена персонажей (для alt и порядка) -----
         const characters = [
-            { name: "Крош",   color: "#77DDFF", accent: "#FFAA66" },
-            { name: "Нюша",   color: "#FFB7C5", accent: "#FF5E8E" },
-            { name: "Бараш",  color: "#C9A0DC", accent: "#9370DB" },
-            { name: "Лосяш",  color: "#E6B85C", accent: "#C97E2A" },
-            { name: "Совунья",color: "#C07FCF", accent: "#A156B0" },
-            { name: "Копатыч",color: "#B27A4A", accent: "#8B5A2B" },
-            { name: "Ёжик",   color: "#C27E4A", accent: "#8B4513" },
-            { name: "Пин",    color: "#4F8A8C", accent: "#2C5F5D" },
-            { name: "Кар-Карыч", color: "#4F3B6F", accent: "#2F2046" }
+            { name: "Крош",     file: "krosh.png" },
+            { name: "Нюша",     file: "nyusha.png" },
+            { name: "Бараш",    file: "barash.png" },
+            { name: "Лосяш",    file: "losyash.png" },
+            { name: "Совунья",  file: "sovunya.png" },
+            { name: "Копатыч",  file: "kopatych.png" },
+            { name: "Ёжик",     file: "ezhik.png" },
+            { name: "Пин",      file: "pin.png" },
+            { name: "Кар-Карыч",file: "karkarych.png" }
         ];
         
-        const petalCount = characters.length; // 9
+        const petalCount = characters.length;
         const spinnerElem = document.getElementById('spinner');
         const spinBtn = document.getElementById('spinBtn');
         
-        // ---------- Фабрики SVG для каждого смешарика (все уникальные) ----------
-        function createKroshSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#FFA559"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const earL = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            earL.setAttribute("cx", "30"); earL.setAttribute("cy", "20"); earL.setAttribute("rx", "12"); earL.setAttribute("ry", "18");
-            earL.setAttribute("fill", color); earL.setAttribute("stroke", "#FFA559"); earL.setAttribute("stroke-width", "1.5");
-            svg.appendChild(earL);
-            const earR = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            earR.setAttribute("cx", "70"); earR.setAttribute("cy", "20"); earR.setAttribute("rx", "12"); earR.setAttribute("ry", "18");
-            earR.setAttribute("fill", color); earR.setAttribute("stroke", "#FFA559"); earR.setAttribute("stroke-width", "1.5");
-            svg.appendChild(earR);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3.5"); pupilL.setAttribute("fill", "#2F2E41");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3.5"); pupilR.setAttribute("fill", "#2F2E41");
-            svg.appendChild(pupilR);
-            const nose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            nose.setAttribute("cx", "50"); nose.setAttribute("cy", "62"); nose.setAttribute("rx", "6"); nose.setAttribute("ry", "5");
-            nose.setAttribute("fill", "#FF8C8C");
-            svg.appendChild(nose);
-            const smile = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            smile.setAttribute("d", "M 40 70 Q 50 80 60 70"); smile.setAttribute("stroke", "#613913"); smile.setAttribute("fill", "none"); smile.setAttribute("stroke-width", "2");
-            svg.appendChild(smile);
-            return svg;
-        }
-        
-        function createNyushaSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#FF8696"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const bow = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            bow.setAttribute("d", "M 35 20 L 50 30 L 65 20 L 55 35 L 50 42 L 45 35 Z"); bow.setAttribute("fill", "#FF5A7A");
-            svg.appendChild(bow);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3.5"); pupilL.setAttribute("fill", "#2F2E41");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3.5"); pupilR.setAttribute("fill", "#2F2E41");
-            svg.appendChild(pupilR);
-            const lashes = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            lashes.setAttribute("d", "M 28 46 L 32 44 M 72 46 L 68 44"); lashes.setAttribute("stroke", "#542C1A"); lashes.setAttribute("stroke-width", "1.8");
-            svg.appendChild(lashes);
-            const pigNose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            pigNose.setAttribute("cx", "50"); pigNose.setAttribute("cy", "64"); pigNose.setAttribute("rx", "7"); pigNose.setAttribute("ry", "5");
-            pigNose.setAttribute("fill", "#E86F6F");
-            svg.appendChild(pigNose);
-            const nostril = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            nostril.setAttribute("cx", "47"); nostril.setAttribute("cy", "64"); nostril.setAttribute("r", "2"); nostril.setAttribute("fill", "#B34848");
-            svg.appendChild(nostril);
-            const nostril2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            nostril2.setAttribute("cx", "53"); nostril2.setAttribute("cy", "64"); nostril2.setAttribute("r", "2"); nostril2.setAttribute("fill", "#B34848");
-            svg.appendChild(nostril2);
-            return svg;
-        }
-        
-        function createBarashSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B280D9"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const hornL = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            hornL.setAttribute("d", "M 33 28 Q 27 15 36 10"); hornL.setAttribute("fill", "#A569BD"); hornL.setAttribute("stroke", "#7B4B9E");
-            svg.appendChild(hornL);
-            const hornR = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            hornR.setAttribute("d", "M 67 28 Q 73 15 64 10"); hornR.setAttribute("fill", "#A569BD"); hornR.setAttribute("stroke", "#7B4B9E");
-            svg.appendChild(hornR);
-            const curl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            curl.setAttribute("cx", "25"); curl.setAttribute("cy", "58"); curl.setAttribute("r", "9"); curl.setAttribute("fill", "#D6A2F0");
-            svg.appendChild(curl);
-            const curl2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            curl2.setAttribute("cx", "75"); curl2.setAttribute("cy", "58"); curl2.setAttribute("r", "9"); curl2.setAttribute("fill", "#D6A2F0");
-            svg.appendChild(curl2);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "36"); eyeL.setAttribute("cy", "47"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "64"); eyeR.setAttribute("cy", "47"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "38"); pupilL.setAttribute("cy", "49"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "black");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "66"); pupilR.setAttribute("cy", "49"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "black");
-            svg.appendChild(pupilR);
-            return svg;
-        }
-        
-        function createLosyashSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#C2822F"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const antlerL = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            antlerL.setAttribute("d", "M 35 27 L 22 16 L 27 8 L 35 15 L 42 10"); antlerL.setAttribute("fill", "#B57439"); antlerL.setAttribute("stroke", "#8B4E1C");
-            svg.appendChild(antlerL);
-            const antlerR = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            antlerR.setAttribute("d", "M 65 27 L 78 16 L 73 8 L 65 15 L 58 10"); antlerR.setAttribute("fill", "#B57439"); antlerR.setAttribute("stroke", "#8B4E1C");
-            svg.appendChild(antlerR);
-            const glassL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            glassL.setAttribute("cx", "35"); glassL.setAttribute("cy", "48"); glassL.setAttribute("r", "9"); glassL.setAttribute("fill", "#E9F2FF"); glassL.setAttribute("stroke", "#3A2A1A"); glassL.setAttribute("stroke-width", "2");
-            svg.appendChild(glassL);
-            const glassR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            glassR.setAttribute("cx", "65"); glassR.setAttribute("cy", "48"); glassR.setAttribute("r", "9"); glassR.setAttribute("fill", "#E9F2FF"); glassR.setAttribute("stroke", "#3A2A1A"); glassR.setAttribute("stroke-width", "2");
-            svg.appendChild(glassR);
-            const bridge = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            bridge.setAttribute("x1", "44"); bridge.setAttribute("y1", "48"); bridge.setAttribute("x2", "56"); bridge.setAttribute("y2", "48"); bridge.setAttribute("stroke", "#3A2A1A"); bridge.setAttribute("stroke-width", "2");
-            svg.appendChild(bridge);
-            const noseBig = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            noseBig.setAttribute("cx", "50"); noseBig.setAttribute("cy", "66"); noseBig.setAttribute("rx", "8"); noseBig.setAttribute("ry", "6"); noseBig.setAttribute("fill", "#DF7A2A");
-            svg.appendChild(noseBig);
-            return svg;
-        }
-        
-        function createSovunyaSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#AA6BC2"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const cap = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            cap.setAttribute("d", "M 30 20 Q 50 8 70 20 L 68 30 Q 50 20 32 30 Z"); cap.setAttribute("fill", "#9B59B6");
-            svg.appendChild(cap);
-            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            beak.setAttribute("points", "45,60 55,60 50,70"); beak.setAttribute("fill", "#F39C12");
-            svg.appendChild(beak);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "8"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "8"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "4"); pupilL.setAttribute("fill", "#1F1A24");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "4"); pupilR.setAttribute("fill", "#1F1A24");
-            svg.appendChild(pupilR);
-            return svg;
-        }
-        
-        function createKopatychSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B5651E"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const hat = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            hat.setAttribute("cx", "50"); hat.setAttribute("cy", "24"); hat.setAttribute("rx", "27"); hat.setAttribute("ry", "12"); hat.setAttribute("fill", "#7D3C1A");
-            svg.appendChild(hat);
-            const hatTop = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            hatTop.setAttribute("x", "38"); hatTop.setAttribute("y", "12"); hatTop.setAttribute("width", "24"); hatTop.setAttribute("height", "14"); hatTop.setAttribute("fill", "#7D3C1A"); hatTop.setAttribute("rx", "4");
-            svg.appendChild(hatTop);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "#231F1B");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "#231F1B");
-            svg.appendChild(pupilR);
-            const nosePotato = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            nosePotato.setAttribute("cx", "50"); nosePotato.setAttribute("cy", "64"); nosePotato.setAttribute("rx", "7"); nosePotato.setAttribute("ry", "6"); nosePotato.setAttribute("fill", "#A55D35");
-            svg.appendChild(nosePotato);
-            return svg;
-        }
-
-        // Ёжик (колючки, добрые глаза)
-        function createEzhikSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#A55227"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            // колючки (треугольнички)
-            for (let i = 0; i < 12; i++) {
-                const angle = (i / 12) * Math.PI * 2;
-                const x = 50 + 40 * Math.cos(angle);
-                const y = 50 + 40 * Math.sin(angle);
-                const spike = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                spike.setAttribute("points", `${x},${y} ${x-6},${y-12} ${x+6},${y-12}`);
-                spike.setAttribute("fill", "#8B5A2B");
-                spike.setAttribute("stroke", "#6B3E1A");
-                svg.appendChild(spike);
+        // ---------- Построение спиннера: вместо SVG вставляем <img> из папки images ----------
+        function buildSpinner() {
+            // сохраним центральный элемент (он будет пересоздан)
+            const oldCenter = spinnerElem.querySelector('.spinner-center');
+            spinnerElem.innerHTML = '';
+            
+            for (let i = 0; i < petalCount; i++) {
+                const petalDiv = document.createElement('div');
+                petalDiv.classList.add('petal');
+                
+                const img = document.createElement('img');
+                // путь к картинке: папка images/ + имя файла
+                img.src = `images/${characters[i].file}`;
+                img.alt = characters[i].name;
+                // обработчик ошибки на случай, если картинка не загрузится (покажем имя)
+                img.onerror = function() {
+                    this.style.objectFit = "none";
+                    this.alt = characters[i].name;
+                };
+                
+                petalDiv.appendChild(img);
+                spinnerElem.appendChild(petalDiv);
             }
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "46"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "46"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "46"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "#1F1A0E");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "46"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "#1F1A0E");
-            svg.appendChild(pupilR);
-            const nose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            nose.setAttribute("cx", "50"); nose.setAttribute("cy", "62"); nose.setAttribute("rx", "6"); nose.setAttribute("ry", "5"); nose.setAttribute("fill", "#512A10");
-            svg.appendChild(nose);
-            return svg;
+            // восстановить центральную кнопку
+            if (oldCenter) {
+                spinnerElem.appendChild(oldCenter);
+            } else {
+                const newCenter = document.createElement('div');
+                newCenter.classList.add('spinner-center');
+                newCenter.innerHTML = '<span>⚡ КРУТИ!</span>';
+                spinnerElem.appendChild(newCenter);
+            }
+            // пересчитать позиции лепестков
+            updatePetalsPosition();
         }
-
-        // Пингвин Пин
-        function createPinSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#2C5F5D"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const belly = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            belly.setAttribute("cx", "50"); belly.setAttribute("cy", "58"); belly.setAttribute("rx", "28"); belly.setAttribute("ry", "32"); belly.setAttribute("fill", "#F0E6D2");
-            svg.appendChild(belly);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "44"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "44"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "44"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "black");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "44"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "black");
-            svg.appendChild(pupilR);
-            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            beak.setAttribute("points", "45,56 55,56 50,66"); beak.setAttribute("fill", "#F5BC42");
-            svg.appendChild(beak);
-            const glasses = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            glasses.setAttribute("cx", "34"); glasses.setAttribute("cy", "44"); glasses.setAttribute("r", "9"); glasses.setAttribute("fill", "none"); glasses.setAttribute("stroke", "#644117"); glasses.setAttribute("stroke-width", "2");
-            svg.appendChild(glasses);
-            const glassesR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            glassesR.setAttribute("cx", "66"); glassesR.setAttribute("cy", "44"); glassesR.setAttribute("r", "9"); glassesR.setAttribute("fill", "none"); glassesR.setAttribute("stroke", "#644117"); glassesR.setAttribute("stroke-width", "2");
-            svg.appendChild(glassesR);
-            return svg;
-        }
-
-        // Кар-Карыч (ворона в шляпе)
-        function createKarKarychSVG(color, accent) {
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("viewBox", "0 0 100 100");
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#4F3B6F"); circle.setAttribute("stroke-width", "2");
-            svg.appendChild(circle);
-            const hat = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            hat.setAttribute("x", "35"); hat.setAttribute("y", "18"); hat.setAttribute("width", "30"); hat.setAttribute("height", "18"); hat.setAttribute("fill", "#1E1333"); hat.setAttribute("rx", "4");
-            svg.appendChild(hat);
-            const hatBr = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            hatBr.setAttribute("cx", "50"); hatBr.setAttribute("cy", "20"); hatBr.setAttribute("rx", "20"); hatBr.setAttribute("ry", "6"); hatBr.setAttribute("fill", "#2A1D42");
-            svg.appendChild(hatBr);
-            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "8"); eyeL.setAttribute("fill", "#F7F7A8");
-            svg.appendChild(eyeL);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "8"); eyeR.setAttribute("fill", "#F7F7A8");
-            svg.appendChild(eyeR);
-            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "4"); pupilL.setAttribute("fill", "#000");
-            svg.appendChild(pupilL);
-            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "4"); pupilR.setAttribute("fill", "#000");
-            svg.appendChild(pupilR);
-            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            beak.setAttribute("points", "46,60 54,60 50,71"); beak.setAttribute("fill", "#FFA559");
-            svg.appendChild(beak);
-            return svg;
-        }
-
-        const creators = [
-            createKroshSVG, createNyushaSVG, createBarashSVG, createLosyashSVG, createSovunyaSVG, createKopatychSVG,
-            createEzhikSVG, createPinSVG, createKarKarychSVG
-        ];
         
-        // ---------- ГЕОМЕТРИЯ ЛЕПЕСТКОВ ----------
+        // ----- Геометрия лепестков (чтобы были ровно по кругу) -----
         function updatePetalsPosition() {
             const petals = document.querySelectorAll('.petal');
             if (!petals.length) return;
@@ -567,11 +284,14 @@
             const containerWidth = spinnerRect.width;
             const centerX = containerWidth / 2;
             const centerY = containerWidth / 2;
+            
             let petalWidth = 98;
             if (containerWidth < 400) petalWidth = 74;
             if (containerWidth < 340) petalWidth = 64;
+            // радиус от центра спиннера до центра лепестка
             let dynamicRadius = (containerWidth / 2) - (petalWidth / 2) - 12;
             if (dynamicRadius < 65) dynamicRadius = 65;
+            
             petals.forEach((petal, idx) => {
                 const angle = (idx / petalCount) * Math.PI * 2;
                 const x = centerX + dynamicRadius * Math.cos(angle) - (petalWidth / 2);
@@ -580,59 +300,35 @@
                 petal.style.top = `${y}px`;
                 petal.style.width = `${petalWidth}px`;
                 petal.style.height = `${petalWidth}px`;
-                const svgElem = petal.querySelector('svg');
-                if (svgElem) {
-                    svgElem.style.width = `${petalWidth - 8}px`;
-                    svgElem.style.height = `${petalWidth - 8}px`;
-                }
+                // картинка внутри адаптируется автоматически через CSS
             });
         }
         
-        function buildSpinner() {
-            // сохраним центральный элемент
-            const centerDiv = spinnerElem.querySelector('.spinner-center');
-            spinnerElem.innerHTML = '';
-            for (let i = 0; i < petalCount; i++) {
-                const petalDiv = document.createElement('div');
-                petalDiv.classList.add('petal');
-                const char = characters[i];
-                const svgElement = creators[i](char.color, char.accent);
-                petalDiv.appendChild(svgElement);
-                spinnerElem.appendChild(petalDiv);
-            }
-            if (centerDiv) spinnerElem.appendChild(centerDiv);
-            else {
-                const newCenter = document.createElement('div');
-                newCenter.classList.add('spinner-center');
-                newCenter.innerHTML = '<span>⚡ КРУТИ!</span>';
-                spinnerElem.appendChild(newCenter);
-            }
-            updatePetalsPosition();
-        }
-
-        // ---------- УПРАВЛЕНИЕ ВРАЩЕНИЕМ (плавный пуск / плавная остановка в случайном угле) ----------
-        let currentAngle = 0;         // градусы
-        let angularSpeed = 0;          // градусы за кадр
+        // ---------- Плавное вращение и остановка с замедлением ----------
+        let currentAngle = 0;          // текущий угол поворота (градусы)
+        let angularSpeed = 0;          // скорость (градусов на кадр)
         let animFrameId = null;
-        let isSpinningActive = false;   // вращается или замедляется?
-        let isStopping = false;          // флаг, чтобы не повторять остановку
+        let isSpinningActive = false;   // крутится ли спиннер (не считая замедления)
+        let isStopping = false;         // находится ли в процессе торможения
         
-        const BASE_SPEED = 11;           // скорость вращения при активном кручении (градусов/кадр ~ 660°/сек)
-        const DECAY_FACTOR = 0.96;       // плавное замедление
-        const STOP_THRESHOLD = 0.15;     // остановиться, когда скорость ниже
+        const BASE_SPEED = 11;          // постоянная скорость при вращении
+        const DECAY_FACTOR = 0.96;      // коэффициент замедления
+        const STOP_THRESHOLD = 0.15;    // порог остановки
         
         function updateRotation() {
             if (!animFrameId) return;
+            
             currentAngle += angularSpeed;
             currentAngle = currentAngle % 360;
             spinnerElem.style.transform = `rotate(${currentAngle}deg)`;
+            
             if (isSpinningActive && !isStopping) {
-                // обычное вращение с постоянной скоростью
+                // режим активного вращения: скорость постоянная
                 angularSpeed = BASE_SPEED;
                 animFrameId = requestAnimationFrame(updateRotation);
             } 
             else if (isStopping) {
-                // замедление
+                // режим замедления
                 angularSpeed *= DECAY_FACTOR;
                 if (Math.abs(angularSpeed) < STOP_THRESHOLD) {
                     // полная остановка
@@ -641,6 +337,7 @@
                     isStopping = false;
                     cancelAnimationFrame(animFrameId);
                     animFrameId = null;
+                    // меняем текст кнопки обратно
                     spinBtn.innerHTML = "🌀 КРУТИТЬ! 🌀";
                     spinBtn.style.background = "linear-gradient(135deg, #ffcf6e, #ffa843)";
                 } else {
@@ -648,7 +345,7 @@
                 }
             }
             else {
-                // полностью остановлено — ничего не делаем, но если анимация ещё идёт, завершаем
+                // полностью остановлен — завершаем анимацию
                 if (animFrameId) {
                     cancelAnimationFrame(animFrameId);
                     animFrameId = null;
@@ -657,10 +354,7 @@
         }
         
         function startSpin() {
-            if (animFrameId) {
-                // если уже крутится или тормозит — ничего не делаем (защита)
-                return;
-            }
+            if (animFrameId) return; // уже что-то происходит
             isSpinningActive = true;
             isStopping = false;
             angularSpeed = BASE_SPEED;
@@ -670,31 +364,30 @@
         }
         
         function stopSpinSmooth() {
-            if (!isSpinningActive || isStopping) return;   // уже останавливаемся или не вращается
+            if (!isSpinningActive || isStopping) return;
+            // начинаем торможение
             isStopping = true;
-            // скорость уже есть, продолжим замедление в updateRotation
-            // не меняем кнопку пока не остановимся полностью
+            // скорость уже есть, будет постепенно уменьшаться в updateRotation
         }
         
         function toggleSpin() {
             if (isSpinningActive && !isStopping) {
-                // крутится -> останавливаем плавно
-                stopSpinSmooth();
+                stopSpinSmooth();   // если крутится — останавливаем плавно
             } else if (!isSpinningActive && !animFrameId) {
-                // полностью остановлен -> запускаем вращение
-                startSpin();
+                startSpin();        // если стоит — запускаем
             }
-            // если процесс остановки уже идёт — игнорируем повторный клик
+            // если уже останавливается — игнорируем повторный клик
         }
         
-        // пересчёт позиций при ресайзе
+        // ---------- Инициализация и подгонка при ресайзе ----------
         window.addEventListener('resize', () => {
             if (spinnerElem) updatePetalsPosition();
         });
         
         buildSpinner();
         spinBtn.addEventListener('click', toggleSpin);
-        setTimeout(() => updatePetalsPosition(), 50);
+        // дополнительный пересчёт после загрузки картинок (чтобы позиции стали точными)
+        setTimeout(() => updatePetalsPosition(), 100);
     })();
 </script>
 </body>
