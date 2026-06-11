@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Смешарик Спиннер | Крути прикол!</title>
+    <title>Смешарик Спиннер | 9 героев | Плавная остановка</title>
     <style>
         * {
             margin: 0;
@@ -21,20 +21,18 @@
             font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Comic Neue', sans-serif;
             padding: 20px;
             overflow-x: hidden;
-            cursor: default;
         }
 
-        /* карточка-контейнер с тенью */
+        /* карточка-контейнер */
         .game-container {
-            background: rgba(255,248,205,0.85);
-            backdrop-filter: blur(3px);
+            background: rgba(255,248,205,0.88);
+            backdrop-filter: blur(4px);
             border-radius: 80px 80px 70px 70px;
             padding: 35px 25px 40px 25px;
             box-shadow: 0 25px 40px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,200,0.8);
             transition: all 0.2s ease;
         }
 
-        /* спиннер-холст */
         .spinner-wrapper {
             display: flex;
             justify-content: center;
@@ -45,87 +43,70 @@
 
         .spinner {
             position: relative;
-            width: 460px;
-            height: 460px;
+            width: 500px;
+            height: 500px;
             background: radial-gradient(circle at 30% 30%, #ffefb0, #f7d98c);
             border-radius: 50%;
             box-shadow: 0 20px 30px rgba(0,0,0,0.3), inset 0 0 0 8px #ffdfa5, inset 0 0 0 12px #e8b56e;
             transition: box-shadow 0.2s;
             cursor: pointer;
+            will-change: transform;
         }
 
-        /* центральная ось (украшение) */
+        /* центральная ось — тоже вращается вместе со спиннером (как настоящий спиннер) */
         .spinner-center {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90px;
-            height: 90px;
+            width: 96px;
+            height: 96px;
             background: radial-gradient(circle, #f5e7b2, #e7bc6e);
             border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,200,0.8);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,200,0.8);
             z-index: 20;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: bold;
             font-family: 'Segoe UI', cursive;
             color: #aa7c3c;
             text-shadow: 0 1px 0 white;
             border: 2px solid #ffcd94;
             backdrop-filter: blur(2px);
+            pointer-events: none;
         }
         .spinner-center span {
             transform: rotate(-5deg);
-            background: rgba(255,245,190,0.7);
-            padding: 6px 10px;
+            background: rgba(255,245,190,0.8);
+            padding: 6px 12px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            font-weight: bold;
         }
 
-        /* каждый лепесток - абсолютный элемент, круг с картинкой */
+        /* каждый лепесток — круглый с персонажем */
         .petal {
             position: absolute;
-            width: 92px;
-            height: 92px;
+            width: 98px;
+            height: 98px;
             border-radius: 50%;
-            background: #fff1cf;
+            background: #fff3dd;
             box-shadow: 0 8px 14px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255,255,200,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
-            cursor: default;
+            transition: all 0.05s ease;
             z-index: 10;
             border: 2px solid #ffcf8a;
         }
         
-        /* внутренние SVG-иконки */
         .petal svg {
-            width: 84px;
-            height: 84px;
+            width: 88px;
+            height: 88px;
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
             transition: transform 0.2s;
-        }
-        
-        /* крутилка-анимация */
-        .spinner.spinning {
-            animation: spinWheel 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
-            animation-iteration-count: infinite;
-            animation-duration: 1.2s;
-            animation-timing-function: linear;
-        }
-        
-        /* эффект ускорения после клика — легкий баунс для прикола */
-        .spinner.spinning {
-            animation: spinLinear 1.2s infinite linear;
-        }
-        
-        @keyframes spinLinear {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
         
         /* кнопка с характером */
@@ -155,7 +136,6 @@
             box-shadow: 0 4px 0 #9b5e2c;
         }
         
-        /* веселая подпись */
         .caption {
             text-align: center;
             margin-top: 20px;
@@ -172,35 +152,53 @@
         }
         
         /* адаптив */
-        @media (max-width: 550px) {
+        @media (max-width: 620px) {
             .spinner {
-                width: 340px;
-                height: 340px;
+                width: 380px;
+                height: 380px;
             }
             .petal {
-                width: 70px;
-                height: 70px;
+                width: 74px;
+                height: 74px;
             }
             .petal svg {
-                width: 62px;
-                height: 62px;
+                width: 66px;
+                height: 66px;
             }
             .spinner-center {
-                width: 70px;
-                height: 70px;
-                font-size: 1.6rem;
+                width: 74px;
+                height: 74px;
+                font-size: 1.4rem;
+            }
+            .spinner-center span {
+                font-size: 0.75rem;
+                padding: 3px 8px;
             }
             .btn-spin {
                 font-size: 1.6rem;
                 padding: 10px 28px;
             }
-            .spinner-center span {
-                font-size: 0.8rem;
-                padding: 3px 6px;
+        }
+
+        @media (max-width: 480px) {
+            .spinner {
+                width: 320px;
+                height: 320px;
+            }
+            .petal {
+                width: 64px;
+                height: 64px;
+            }
+            .petal svg {
+                width: 56px;
+                height: 56px;
+            }
+            .spinner-center {
+                width: 64px;
+                height: 64px;
             }
         }
-        
-        /* искорки для настроения */
+
         .spinner-wrapper::before {
             content: "✨";
             position: absolute;
@@ -226,82 +224,43 @@
 <div class="game-container">
     <div class="spinner-wrapper">
         <div class="spinner" id="spinner">
-            <!-- сюда скрипт добавит лепестки (смешариков) -->
+            <!-- лепестки добавятся скриптом -->
             <div class="spinner-center"><span>⚡ КРУТИ!</span></div>
         </div>
     </div>
     <button class="btn-spin" id="spinBtn">🌀 КРУТИТЬ! 🌀</button>
     <div style="display: flex; justify-content: center; margin-top: 14px;">
-        <div class="caption">🍭 один лепесток — один смешарик! жми на кнопку 🍬</div>
+        <div class="caption">🍭 9 смешариков | плавная остановка в случайном положении 🍬</div>
     </div>
 </div>
 
 <script>
     (function() {
-        // ---------- список персонажей (каждый со своей уникальной svg-мордашкой) ----------
+        // ---------- 9 персонажей: старые + Ёжик, Пин, Кар-Карыч ----------
         const characters = [
-            { name: "Крош",  color: "#77DDFF",   accent: "#FFAA66" },  // голубой зайка
-            { name: "Нюша",  color: "#FFB7C5",   accent: "#FF5E8E" },  // розовая свинка
-            { name: "Бараш", color: "#C9A0DC",   accent: "#9370DB" },  // фиолетовый поэт
-            { name: "Лосяш", color: "#E6B85C",   accent: "#C97E2A" },  // учёный лось
-            { name: "Совунья",color: "#C07FCF",   accent: "#A156B0" },  // мудрая сова
-            { name: "Копатыч",color: "#B27A4A",   accent: "#8B5A2B" }    // медведь-огородник
+            { name: "Крош",   color: "#77DDFF", accent: "#FFAA66" },
+            { name: "Нюша",   color: "#FFB7C5", accent: "#FF5E8E" },
+            { name: "Бараш",  color: "#C9A0DC", accent: "#9370DB" },
+            { name: "Лосяш",  color: "#E6B85C", accent: "#C97E2A" },
+            { name: "Совунья",color: "#C07FCF", accent: "#A156B0" },
+            { name: "Копатыч",color: "#B27A4A", accent: "#8B5A2B" },
+            { name: "Ёжик",   color: "#C27E4A", accent: "#8B4513" },
+            { name: "Пин",    color: "#4F8A8C", accent: "#2C5F5D" },
+            { name: "Кар-Карыч", color: "#4F3B6F", accent: "#2F2046" }
         ];
         
-        // кол-во лепестков = 6
-        const petalCount = characters.length;
+        const petalCount = characters.length; // 9
         const spinnerElem = document.getElementById('spinner');
         const spinBtn = document.getElementById('spinBtn');
         
-        // параметры окружности: радиус расположения центров лепестков (от центра спиннера)
-        const radius = 148;    // для контейнера 460px идеально (460/2 - 45 = 185 -> используем 155~160, берем 155)
-        // но для адаптива всё равно пересчитаем при старте? лучше фикс для 460px + адаптив через проценты? не критично, ок
-        // но при изменении экрана скрипт не пересчитывает позиции? размеры spinner фиксированы в пикселях (460px),
-        // на мобиле 340px. Для простоты сделаем функцию, которая вычисляет позиции динамически при создании
-        // и при resize пересчитывать не обязательно, ибо стили адаптивны под ширину спиннера — но позиции абсолютные.
-        // Чтобы на 340px лепестки не разбегались, пересчитаем под текущий размер спиннера (getComputedStyle)
-        function updatePetalsPosition() {
-            const petals = document.querySelectorAll('.petal');
-            if (!petals.length) return;
-            const spinnerRect = spinnerElem.getBoundingClientRect();
-            const containerWidth = spinnerRect.width;
-            const centerX = containerWidth / 2;
-            const centerY = containerWidth / 2;
-            // радиус от центра до центра лепестка = (ширина/2) - (ширина лепестка/2) - отступ 8px
-            // берём среднее значение, чтобы лепестки не вылезали
-            let petalWidth = 92;
-            if (containerWidth < 400) petalWidth = 70;
-            // радиус размещения = половина спиннера - половина лепестка - небольшой отступ
-            let dynamicRadius = (containerWidth / 2) - (petalWidth / 2) - 10;
-            if (dynamicRadius < 70) dynamicRadius = 70;
-            
-            petals.forEach((petal, idx) => {
-                const angle = (idx / petalCount) * Math.PI * 2;
-                const x = centerX + dynamicRadius * Math.cos(angle) - (petalWidth / 2);
-                const y = centerY + dynamicRadius * Math.sin(angle) - (petalWidth / 2);
-                petal.style.left = `${x}px`;
-                petal.style.top = `${y}px`;
-                petal.style.width = `${petalWidth}px`;
-                petal.style.height = `${petalWidth}px`;
-                const svgElem = petal.querySelector('svg');
-                if (svgElem) {
-                    svgElem.style.width = `${petalWidth - 8}px`;
-                    svgElem.style.height = `${petalWidth - 8}px`;
-                }
-            });
-        }
-        
-        // ----- Фабрика SVG для каждого смешарика с уникальным стилем -----
+        // ---------- Фабрики SVG для каждого смешарика (все уникальные) ----------
         function createKroshSVG(color, accent) {
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("viewBox", "0 0 100 100");
-            // фон
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
-            circle.setAttribute("fill", color);
-            circle.setAttribute("stroke", "#FFA559"); circle.setAttribute("stroke-width", "2");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#FFA559"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // уши Кроша (длинные)
             const earL = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
             earL.setAttribute("cx", "30"); earL.setAttribute("cy", "20"); earL.setAttribute("rx", "12"); earL.setAttribute("ry", "18");
             earL.setAttribute("fill", color); earL.setAttribute("stroke", "#FFA559"); earL.setAttribute("stroke-width", "1.5");
@@ -310,7 +269,6 @@
             earR.setAttribute("cx", "70"); earR.setAttribute("cy", "20"); earR.setAttribute("rx", "12"); earR.setAttribute("ry", "18");
             earR.setAttribute("fill", color); earR.setAttribute("stroke", "#FFA559"); earR.setAttribute("stroke-width", "1.5");
             svg.appendChild(earR);
-            // глаза
             const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
             svg.appendChild(eyeL);
@@ -323,12 +281,10 @@
             const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3.5"); pupilR.setAttribute("fill", "#2F2E41");
             svg.appendChild(pupilR);
-            // носик розовый
             const nose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
             nose.setAttribute("cx", "50"); nose.setAttribute("cy", "62"); nose.setAttribute("rx", "6"); nose.setAttribute("ry", "5");
             nose.setAttribute("fill", "#FF8C8C");
             svg.appendChild(nose);
-            // улыбка
             const smile = document.createElementNS("http://www.w3.org/2000/svg", "path");
             smile.setAttribute("d", "M 40 70 Q 50 80 60 70"); smile.setAttribute("stroke", "#613913"); smile.setAttribute("fill", "none"); smile.setAttribute("stroke-width", "2");
             svg.appendChild(smile);
@@ -342,11 +298,9 @@
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
             circle.setAttribute("fill", color); circle.setAttribute("stroke", "#FF8696"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // бантик
             const bow = document.createElementNS("http://www.w3.org/2000/svg", "path");
             bow.setAttribute("d", "M 35 20 L 50 30 L 65 20 L 55 35 L 50 42 L 45 35 Z"); bow.setAttribute("fill", "#FF5A7A");
             svg.appendChild(bow);
-            // глазки с ресничками
             const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
             svg.appendChild(eyeL);
@@ -362,7 +316,6 @@
             const lashes = document.createElementNS("http://www.w3.org/2000/svg", "path");
             lashes.setAttribute("d", "M 28 46 L 32 44 M 72 46 L 68 44"); lashes.setAttribute("stroke", "#542C1A"); lashes.setAttribute("stroke-width", "1.8");
             svg.appendChild(lashes);
-            // пятачок
             const pigNose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
             pigNose.setAttribute("cx", "50"); pigNose.setAttribute("cy", "64"); pigNose.setAttribute("rx", "7"); pigNose.setAttribute("ry", "5");
             pigNose.setAttribute("fill", "#E86F6F");
@@ -383,21 +336,18 @@
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
             circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B280D9"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // рожки
             const hornL = document.createElementNS("http://www.w3.org/2000/svg", "path");
             hornL.setAttribute("d", "M 33 28 Q 27 15 36 10"); hornL.setAttribute("fill", "#A569BD"); hornL.setAttribute("stroke", "#7B4B9E");
             svg.appendChild(hornL);
             const hornR = document.createElementNS("http://www.w3.org/2000/svg", "path");
             hornR.setAttribute("d", "M 67 28 Q 73 15 64 10"); hornR.setAttribute("fill", "#A569BD"); hornR.setAttribute("stroke", "#7B4B9E");
             svg.appendChild(hornR);
-            // кудряшки щечки
             const curl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             curl.setAttribute("cx", "25"); curl.setAttribute("cy", "58"); curl.setAttribute("r", "9"); curl.setAttribute("fill", "#D6A2F0");
             svg.appendChild(curl);
             const curl2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             curl2.setAttribute("cx", "75"); curl2.setAttribute("cy", "58"); curl2.setAttribute("r", "9"); curl2.setAttribute("fill", "#D6A2F0");
             svg.appendChild(curl2);
-            // грустные глаза
             const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             eyeL.setAttribute("cx", "36"); eyeL.setAttribute("cy", "47"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
             svg.appendChild(eyeL);
@@ -420,14 +370,12 @@
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
             circle.setAttribute("fill", color); circle.setAttribute("stroke", "#C2822F"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // рога ветвистые
             const antlerL = document.createElementNS("http://www.w3.org/2000/svg", "path");
             antlerL.setAttribute("d", "M 35 27 L 22 16 L 27 8 L 35 15 L 42 10"); antlerL.setAttribute("fill", "#B57439"); antlerL.setAttribute("stroke", "#8B4E1C");
             svg.appendChild(antlerL);
             const antlerR = document.createElementNS("http://www.w3.org/2000/svg", "path");
             antlerR.setAttribute("d", "M 65 27 L 78 16 L 73 8 L 65 15 L 58 10"); antlerR.setAttribute("fill", "#B57439"); antlerR.setAttribute("stroke", "#8B4E1C");
             svg.appendChild(antlerR);
-            // очки
             const glassL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             glassL.setAttribute("cx", "35"); glassL.setAttribute("cy", "48"); glassL.setAttribute("r", "9"); glassL.setAttribute("fill", "#E9F2FF"); glassL.setAttribute("stroke", "#3A2A1A"); glassL.setAttribute("stroke-width", "2");
             svg.appendChild(glassL);
@@ -450,11 +398,9 @@
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
             circle.setAttribute("fill", color); circle.setAttribute("stroke", "#AA6BC2"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // шапочка-чепчик
             const cap = document.createElementNS("http://www.w3.org/2000/svg", "path");
             cap.setAttribute("d", "M 30 20 Q 50 8 70 20 L 68 30 Q 50 20 32 30 Z"); cap.setAttribute("fill", "#9B59B6");
             svg.appendChild(cap);
-            // клюв
             const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
             beak.setAttribute("points", "45,60 55,60 50,70"); beak.setAttribute("fill", "#F39C12");
             svg.appendChild(beak);
@@ -480,14 +426,12 @@
             circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
             circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B5651E"); circle.setAttribute("stroke-width", "2");
             svg.appendChild(circle);
-            // шляпа
             const hat = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
             hat.setAttribute("cx", "50"); hat.setAttribute("cy", "24"); hat.setAttribute("rx", "27"); hat.setAttribute("ry", "12"); hat.setAttribute("fill", "#7D3C1A");
             svg.appendChild(hat);
             const hatTop = document.createElementNS("http://www.w3.org/2000/svg", "rect");
             hatTop.setAttribute("x", "38"); hatTop.setAttribute("y", "12"); hatTop.setAttribute("width", "24"); hatTop.setAttribute("height", "14"); hatTop.setAttribute("fill", "#7D3C1A"); hatTop.setAttribute("rx", "4");
             svg.appendChild(hatTop);
-            // глаза добрые
             const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
             svg.appendChild(eyeL);
@@ -505,12 +449,149 @@
             svg.appendChild(nosePotato);
             return svg;
         }
+
+        // Ёжик (колючки, добрые глаза)
+        function createEzhikSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#A55227"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // колючки (треугольнички)
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const x = 50 + 40 * Math.cos(angle);
+                const y = 50 + 40 * Math.sin(angle);
+                const spike = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                spike.setAttribute("points", `${x},${y} ${x-6},${y-12} ${x+6},${y-12}`);
+                spike.setAttribute("fill", "#8B5A2B");
+                spike.setAttribute("stroke", "#6B3E1A");
+                svg.appendChild(spike);
+            }
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "46"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "46"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "46"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "#1F1A0E");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "46"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "#1F1A0E");
+            svg.appendChild(pupilR);
+            const nose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            nose.setAttribute("cx", "50"); nose.setAttribute("cy", "62"); nose.setAttribute("rx", "6"); nose.setAttribute("ry", "5"); nose.setAttribute("fill", "#512A10");
+            svg.appendChild(nose);
+            return svg;
+        }
+
+        // Пингвин Пин
+        function createPinSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#2C5F5D"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            const belly = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            belly.setAttribute("cx", "50"); belly.setAttribute("cy", "58"); belly.setAttribute("rx", "28"); belly.setAttribute("ry", "32"); belly.setAttribute("fill", "#F0E6D2");
+            svg.appendChild(belly);
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "44"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "44"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "44"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "black");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "44"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "black");
+            svg.appendChild(pupilR);
+            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            beak.setAttribute("points", "45,56 55,56 50,66"); beak.setAttribute("fill", "#F5BC42");
+            svg.appendChild(beak);
+            const glasses = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            glasses.setAttribute("cx", "34"); glasses.setAttribute("cy", "44"); glasses.setAttribute("r", "9"); glasses.setAttribute("fill", "none"); glasses.setAttribute("stroke", "#644117"); glasses.setAttribute("stroke-width", "2");
+            svg.appendChild(glasses);
+            const glassesR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            glassesR.setAttribute("cx", "66"); glassesR.setAttribute("cy", "44"); glassesR.setAttribute("r", "9"); glassesR.setAttribute("fill", "none"); glassesR.setAttribute("stroke", "#644117"); glassesR.setAttribute("stroke-width", "2");
+            svg.appendChild(glassesR);
+            return svg;
+        }
+
+        // Кар-Карыч (ворона в шляпе)
+        function createKarKarychSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#4F3B6F"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            const hat = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            hat.setAttribute("x", "35"); hat.setAttribute("y", "18"); hat.setAttribute("width", "30"); hat.setAttribute("height", "18"); hat.setAttribute("fill", "#1E1333"); hat.setAttribute("rx", "4");
+            svg.appendChild(hat);
+            const hatBr = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            hatBr.setAttribute("cx", "50"); hatBr.setAttribute("cy", "20"); hatBr.setAttribute("rx", "20"); hatBr.setAttribute("ry", "6"); hatBr.setAttribute("fill", "#2A1D42");
+            svg.appendChild(hatBr);
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "8"); eyeL.setAttribute("fill", "#F7F7A8");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "8"); eyeR.setAttribute("fill", "#F7F7A8");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "4"); pupilL.setAttribute("fill", "#000");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "4"); pupilR.setAttribute("fill", "#000");
+            svg.appendChild(pupilR);
+            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            beak.setAttribute("points", "46,60 54,60 50,71"); beak.setAttribute("fill", "#FFA559");
+            svg.appendChild(beak);
+            return svg;
+        }
+
+        const creators = [
+            createKroshSVG, createNyushaSVG, createBarashSVG, createLosyashSVG, createSovunyaSVG, createKopatychSVG,
+            createEzhikSVG, createPinSVG, createKarKarychSVG
+        ];
         
-        const creators = [createKroshSVG, createNyushaSVG, createBarashSVG, createLosyashSVG, createSovunyaSVG, createKopatychSVG];
+        // ---------- ГЕОМЕТРИЯ ЛЕПЕСТКОВ ----------
+        function updatePetalsPosition() {
+            const petals = document.querySelectorAll('.petal');
+            if (!petals.length) return;
+            const spinnerRect = spinnerElem.getBoundingClientRect();
+            const containerWidth = spinnerRect.width;
+            const centerX = containerWidth / 2;
+            const centerY = containerWidth / 2;
+            let petalWidth = 98;
+            if (containerWidth < 400) petalWidth = 74;
+            if (containerWidth < 340) petalWidth = 64;
+            let dynamicRadius = (containerWidth / 2) - (petalWidth / 2) - 12;
+            if (dynamicRadius < 65) dynamicRadius = 65;
+            petals.forEach((petal, idx) => {
+                const angle = (idx / petalCount) * Math.PI * 2;
+                const x = centerX + dynamicRadius * Math.cos(angle) - (petalWidth / 2);
+                const y = centerY + dynamicRadius * Math.sin(angle) - (petalWidth / 2);
+                petal.style.left = `${x}px`;
+                petal.style.top = `${y}px`;
+                petal.style.width = `${petalWidth}px`;
+                petal.style.height = `${petalWidth}px`;
+                const svgElem = petal.querySelector('svg');
+                if (svgElem) {
+                    svgElem.style.width = `${petalWidth - 8}px`;
+                    svgElem.style.height = `${petalWidth - 8}px`;
+                }
+            });
+        }
         
-        // генерация лепестков
         function buildSpinner() {
-            spinnerElem.innerHTML = ''; // очищаем (но центральный элемент потом добавим)
+            // сохраним центральный элемент
+            const centerDiv = spinnerElem.querySelector('.spinner-center');
+            spinnerElem.innerHTML = '';
             for (let i = 0; i < petalCount; i++) {
                 const petalDiv = document.createElement('div');
                 petalDiv.classList.add('petal');
@@ -519,44 +600,101 @@
                 petalDiv.appendChild(svgElement);
                 spinnerElem.appendChild(petalDiv);
             }
-            // добавить центральный элемент обратно
-            const centerDiv = document.createElement('div');
-            centerDiv.classList.add('spinner-center');
-            centerDiv.innerHTML = '<span>⚡ КРУТИ!</span>';
-            spinnerElem.appendChild(centerDiv);
-            // пересчитать позиции
+            if (centerDiv) spinnerElem.appendChild(centerDiv);
+            else {
+                const newCenter = document.createElement('div');
+                newCenter.classList.add('spinner-center');
+                newCenter.innerHTML = '<span>⚡ КРУТИ!</span>';
+                spinnerElem.appendChild(newCenter);
+            }
             updatePetalsPosition();
         }
+
+        // ---------- УПРАВЛЕНИЕ ВРАЩЕНИЕМ (плавный пуск / плавная остановка в случайном угле) ----------
+        let currentAngle = 0;         // градусы
+        let angularSpeed = 0;          // градусы за кадр
+        let animFrameId = null;
+        let isSpinningActive = false;   // вращается или замедляется?
+        let isStopping = false;          // флаг, чтобы не повторять остановку
         
-        // анимация переключения
-        let isSpinning = false;
-        function toggleSpin() {
-            if (isSpinning) {
-                spinnerElem.classList.remove('spinning');
-                spinBtn.innerHTML = "🌀 КРУТИТЬ! 🌀";
-                spinBtn.style.background = "linear-gradient(135deg, #ffcf6e, #ffa843)";
-                isSpinning = false;
-            } else {
-                spinnerElem.classList.add('spinning');
-                spinBtn.innerHTML = "⏹️ СТОП! ⏹️";
-                spinBtn.style.background = "linear-gradient(135deg, #ff9f4a, #e07c2c)";
-                isSpinning = true;
+        const BASE_SPEED = 11;           // скорость вращения при активном кручении (градусов/кадр ~ 660°/сек)
+        const DECAY_FACTOR = 0.96;       // плавное замедление
+        const STOP_THRESHOLD = 0.15;     // остановиться, когда скорость ниже
+        
+        function updateRotation() {
+            if (!animFrameId) return;
+            currentAngle += angularSpeed;
+            currentAngle = currentAngle % 360;
+            spinnerElem.style.transform = `rotate(${currentAngle}deg)`;
+            if (isSpinningActive && !isStopping) {
+                // обычное вращение с постоянной скоростью
+                angularSpeed = BASE_SPEED;
+                animFrameId = requestAnimationFrame(updateRotation);
+            } 
+            else if (isStopping) {
+                // замедление
+                angularSpeed *= DECAY_FACTOR;
+                if (Math.abs(angularSpeed) < STOP_THRESHOLD) {
+                    // полная остановка
+                    angularSpeed = 0;
+                    isSpinningActive = false;
+                    isStopping = false;
+                    cancelAnimationFrame(animFrameId);
+                    animFrameId = null;
+                    spinBtn.innerHTML = "🌀 КРУТИТЬ! 🌀";
+                    spinBtn.style.background = "linear-gradient(135deg, #ffcf6e, #ffa843)";
+                } else {
+                    animFrameId = requestAnimationFrame(updateRotation);
+                }
+            }
+            else {
+                // полностью остановлено — ничего не делаем, но если анимация ещё идёт, завершаем
+                if (animFrameId) {
+                    cancelAnimationFrame(animFrameId);
+                    animFrameId = null;
+                }
             }
         }
         
-        // обработчик resize - пересчет позиций лепестков при изменении размера окна (адаптив)
+        function startSpin() {
+            if (animFrameId) {
+                // если уже крутится или тормозит — ничего не делаем (защита)
+                return;
+            }
+            isSpinningActive = true;
+            isStopping = false;
+            angularSpeed = BASE_SPEED;
+            animFrameId = requestAnimationFrame(updateRotation);
+            spinBtn.innerHTML = "⏹️ СТОП! ⏹️";
+            spinBtn.style.background = "linear-gradient(135deg, #ff9f4a, #e07c2c)";
+        }
+        
+        function stopSpinSmooth() {
+            if (!isSpinningActive || isStopping) return;   // уже останавливаемся или не вращается
+            isStopping = true;
+            // скорость уже есть, продолжим замедление в updateRotation
+            // не меняем кнопку пока не остановимся полностью
+        }
+        
+        function toggleSpin() {
+            if (isSpinningActive && !isStopping) {
+                // крутится -> останавливаем плавно
+                stopSpinSmooth();
+            } else if (!isSpinningActive && !animFrameId) {
+                // полностью остановлен -> запускаем вращение
+                startSpin();
+            }
+            // если процесс остановки уже идёт — игнорируем повторный клик
+        }
+        
+        // пересчёт позиций при ресайзе
         window.addEventListener('resize', () => {
             if (spinnerElem) updatePetalsPosition();
         });
         
-        // инициализация
         buildSpinner();
         spinBtn.addEventListener('click', toggleSpin);
-        
-        // дополнительно, чтобы при первом рендере позиции были точными, и если картинка подгрузилась
-        setTimeout(() => {
-            updatePetalsPosition();
-        }, 100);
+        setTimeout(() => updatePetalsPosition(), 50);
     })();
 </script>
 </body>
