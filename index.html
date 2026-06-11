@@ -1,1 +1,563 @@
-ляляля
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Смешарик Спиннер | Крути прикол!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1b4d2e 0%, #0e3a22 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Comic Neue', sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* карточка-контейнер с тенью */
+        .game-container {
+            background: rgba(255,248,205,0.85);
+            backdrop-filter: blur(3px);
+            border-radius: 80px 80px 70px 70px;
+            padding: 35px 25px 40px 25px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.4), inset 0 1px 4px rgba(255,255,200,0.8);
+            transition: all 0.2s ease;
+        }
+
+        /* спиннер-холст */
+        .spinner-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .spinner {
+            position: relative;
+            width: 460px;
+            height: 460px;
+            background: radial-gradient(circle at 30% 30%, #ffefb0, #f7d98c);
+            border-radius: 50%;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3), inset 0 0 0 8px #ffdfa5, inset 0 0 0 12px #e8b56e;
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        /* центральная ось (украшение) */
+        .spinner-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #f5e7b2, #e7bc6e);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,200,0.8);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            font-family: 'Segoe UI', cursive;
+            color: #aa7c3c;
+            text-shadow: 0 1px 0 white;
+            border: 2px solid #ffcd94;
+            backdrop-filter: blur(2px);
+        }
+        .spinner-center span {
+            transform: rotate(-5deg);
+            background: rgba(255,245,190,0.7);
+            padding: 6px 10px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+        }
+
+        /* каждый лепесток - абсолютный элемент, круг с картинкой */
+        .petal {
+            position: absolute;
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            background: #fff1cf;
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255,255,200,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            cursor: default;
+            z-index: 10;
+            border: 2px solid #ffcf8a;
+        }
+        
+        /* внутренние SVG-иконки */
+        .petal svg {
+            width: 84px;
+            height: 84px;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            transition: transform 0.2s;
+        }
+        
+        /* крутилка-анимация */
+        .spinner.spinning {
+            animation: spinWheel 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+            animation-iteration-count: infinite;
+            animation-duration: 1.2s;
+            animation-timing-function: linear;
+        }
+        
+        /* эффект ускорения после клика — легкий баунс для прикола */
+        .spinner.spinning {
+            animation: spinLinear 1.2s infinite linear;
+        }
+        
+        @keyframes spinLinear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* кнопка с характером */
+        .btn-spin {
+            background: #ffbc6e;
+            border: none;
+            font-size: 2.2rem;
+            font-weight: bold;
+            font-family: inherit;
+            padding: 14px 34px;
+            border-radius: 60px;
+            color: #45290c;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #9b5e2c;
+            transition: 0.07s linear;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: block;
+            margin: 0 auto;
+            width: fit-content;
+            background: linear-gradient(135deg, #ffcf6e, #ffa843);
+            text-shadow: 0 1px 0 #ffeaaf;
+        }
+        
+        .btn-spin:active {
+            transform: translateY(5px);
+            box-shadow: 0 4px 0 #9b5e2c;
+        }
+        
+        /* веселая подпись */
+        .caption {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #fff1b5;
+            text-shadow: 2px 2px 0 #6b3f1c;
+            font-size: 1rem;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            width: auto;
+            border-radius: 50px;
+            padding: 5px 20px;
+            backdrop-filter: blur(2px);
+        }
+        
+        /* адаптив */
+        @media (max-width: 550px) {
+            .spinner {
+                width: 340px;
+                height: 340px;
+            }
+            .petal {
+                width: 70px;
+                height: 70px;
+            }
+            .petal svg {
+                width: 62px;
+                height: 62px;
+            }
+            .spinner-center {
+                width: 70px;
+                height: 70px;
+                font-size: 1.6rem;
+            }
+            .btn-spin {
+                font-size: 1.6rem;
+                padding: 10px 28px;
+            }
+            .spinner-center span {
+                font-size: 0.8rem;
+                padding: 3px 6px;
+            }
+        }
+        
+        /* искорки для настроения */
+        .spinner-wrapper::before {
+            content: "✨";
+            position: absolute;
+            font-size: 32px;
+            left: -20px;
+            top: 20px;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .spinner-wrapper::after {
+            content: "🌀";
+            position: absolute;
+            font-size: 36px;
+            right: -20px;
+            bottom: 10px;
+            opacity: 0.6;
+            pointer-events: none;
+            transform: rotate(20deg);
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="spinner-wrapper">
+        <div class="spinner" id="spinner">
+            <!-- сюда скрипт добавит лепестки (смешариков) -->
+            <div class="spinner-center"><span>⚡ КРУТИ!</span></div>
+        </div>
+    </div>
+    <button class="btn-spin" id="spinBtn">🌀 КРУТИТЬ! 🌀</button>
+    <div style="display: flex; justify-content: center; margin-top: 14px;">
+        <div class="caption">🍭 один лепесток — один смешарик! жми на кнопку 🍬</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- список персонажей (каждый со своей уникальной svg-мордашкой) ----------
+        const characters = [
+            { name: "Крош",  color: "#77DDFF",   accent: "#FFAA66" },  // голубой зайка
+            { name: "Нюша",  color: "#FFB7C5",   accent: "#FF5E8E" },  // розовая свинка
+            { name: "Бараш", color: "#C9A0DC",   accent: "#9370DB" },  // фиолетовый поэт
+            { name: "Лосяш", color: "#E6B85C",   accent: "#C97E2A" },  // учёный лось
+            { name: "Совунья",color: "#C07FCF",   accent: "#A156B0" },  // мудрая сова
+            { name: "Копатыч",color: "#B27A4A",   accent: "#8B5A2B" }    // медведь-огородник
+        ];
+        
+        // кол-во лепестков = 6
+        const petalCount = characters.length;
+        const spinnerElem = document.getElementById('spinner');
+        const spinBtn = document.getElementById('spinBtn');
+        
+        // параметры окружности: радиус расположения центров лепестков (от центра спиннера)
+        const radius = 148;    // для контейнера 460px идеально (460/2 - 45 = 185 -> используем 155~160, берем 155)
+        // но для адаптива всё равно пересчитаем при старте? лучше фикс для 460px + адаптив через проценты? не критично, ок
+        // но при изменении экрана скрипт не пересчитывает позиции? размеры spinner фиксированы в пикселях (460px),
+        // на мобиле 340px. Для простоты сделаем функцию, которая вычисляет позиции динамически при создании
+        // и при resize пересчитывать не обязательно, ибо стили адаптивны под ширину спиннера — но позиции абсолютные.
+        // Чтобы на 340px лепестки не разбегались, пересчитаем под текущий размер спиннера (getComputedStyle)
+        function updatePetalsPosition() {
+            const petals = document.querySelectorAll('.petal');
+            if (!petals.length) return;
+            const spinnerRect = spinnerElem.getBoundingClientRect();
+            const containerWidth = spinnerRect.width;
+            const centerX = containerWidth / 2;
+            const centerY = containerWidth / 2;
+            // радиус от центра до центра лепестка = (ширина/2) - (ширина лепестка/2) - отступ 8px
+            // берём среднее значение, чтобы лепестки не вылезали
+            let petalWidth = 92;
+            if (containerWidth < 400) petalWidth = 70;
+            // радиус размещения = половина спиннера - половина лепестка - небольшой отступ
+            let dynamicRadius = (containerWidth / 2) - (petalWidth / 2) - 10;
+            if (dynamicRadius < 70) dynamicRadius = 70;
+            
+            petals.forEach((petal, idx) => {
+                const angle = (idx / petalCount) * Math.PI * 2;
+                const x = centerX + dynamicRadius * Math.cos(angle) - (petalWidth / 2);
+                const y = centerY + dynamicRadius * Math.sin(angle) - (petalWidth / 2);
+                petal.style.left = `${x}px`;
+                petal.style.top = `${y}px`;
+                petal.style.width = `${petalWidth}px`;
+                petal.style.height = `${petalWidth}px`;
+                const svgElem = petal.querySelector('svg');
+                if (svgElem) {
+                    svgElem.style.width = `${petalWidth - 8}px`;
+                    svgElem.style.height = `${petalWidth - 8}px`;
+                }
+            });
+        }
+        
+        // ----- Фабрика SVG для каждого смешарика с уникальным стилем -----
+        function createKroshSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            // фон
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color);
+            circle.setAttribute("stroke", "#FFA559"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // уши Кроша (длинные)
+            const earL = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            earL.setAttribute("cx", "30"); earL.setAttribute("cy", "20"); earL.setAttribute("rx", "12"); earL.setAttribute("ry", "18");
+            earL.setAttribute("fill", color); earL.setAttribute("stroke", "#FFA559"); earL.setAttribute("stroke-width", "1.5");
+            svg.appendChild(earL);
+            const earR = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            earR.setAttribute("cx", "70"); earR.setAttribute("cy", "20"); earR.setAttribute("rx", "12"); earR.setAttribute("ry", "18");
+            earR.setAttribute("fill", color); earR.setAttribute("stroke", "#FFA559"); earR.setAttribute("stroke-width", "1.5");
+            svg.appendChild(earR);
+            // глаза
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3.5"); pupilL.setAttribute("fill", "#2F2E41");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3.5"); pupilR.setAttribute("fill", "#2F2E41");
+            svg.appendChild(pupilR);
+            // носик розовый
+            const nose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            nose.setAttribute("cx", "50"); nose.setAttribute("cy", "62"); nose.setAttribute("rx", "6"); nose.setAttribute("ry", "5");
+            nose.setAttribute("fill", "#FF8C8C");
+            svg.appendChild(nose);
+            // улыбка
+            const smile = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            smile.setAttribute("d", "M 40 70 Q 50 80 60 70"); smile.setAttribute("stroke", "#613913"); smile.setAttribute("fill", "none"); smile.setAttribute("stroke-width", "2");
+            svg.appendChild(smile);
+            return svg;
+        }
+        
+        function createNyushaSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#FF8696"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // бантик
+            const bow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            bow.setAttribute("d", "M 35 20 L 50 30 L 65 20 L 55 35 L 50 42 L 45 35 Z"); bow.setAttribute("fill", "#FF5A7A");
+            svg.appendChild(bow);
+            // глазки с ресничками
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "7"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "7"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3.5"); pupilL.setAttribute("fill", "#2F2E41");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3.5"); pupilR.setAttribute("fill", "#2F2E41");
+            svg.appendChild(pupilR);
+            const lashes = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            lashes.setAttribute("d", "M 28 46 L 32 44 M 72 46 L 68 44"); lashes.setAttribute("stroke", "#542C1A"); lashes.setAttribute("stroke-width", "1.8");
+            svg.appendChild(lashes);
+            // пятачок
+            const pigNose = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            pigNose.setAttribute("cx", "50"); pigNose.setAttribute("cy", "64"); pigNose.setAttribute("rx", "7"); pigNose.setAttribute("ry", "5");
+            pigNose.setAttribute("fill", "#E86F6F");
+            svg.appendChild(pigNose);
+            const nostril = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            nostril.setAttribute("cx", "47"); nostril.setAttribute("cy", "64"); nostril.setAttribute("r", "2"); nostril.setAttribute("fill", "#B34848");
+            svg.appendChild(nostril);
+            const nostril2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            nostril2.setAttribute("cx", "53"); nostril2.setAttribute("cy", "64"); nostril2.setAttribute("r", "2"); nostril2.setAttribute("fill", "#B34848");
+            svg.appendChild(nostril2);
+            return svg;
+        }
+        
+        function createBarashSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B280D9"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // рожки
+            const hornL = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            hornL.setAttribute("d", "M 33 28 Q 27 15 36 10"); hornL.setAttribute("fill", "#A569BD"); hornL.setAttribute("stroke", "#7B4B9E");
+            svg.appendChild(hornL);
+            const hornR = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            hornR.setAttribute("d", "M 67 28 Q 73 15 64 10"); hornR.setAttribute("fill", "#A569BD"); hornR.setAttribute("stroke", "#7B4B9E");
+            svg.appendChild(hornR);
+            // кудряшки щечки
+            const curl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            curl.setAttribute("cx", "25"); curl.setAttribute("cy", "58"); curl.setAttribute("r", "9"); curl.setAttribute("fill", "#D6A2F0");
+            svg.appendChild(curl);
+            const curl2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            curl2.setAttribute("cx", "75"); curl2.setAttribute("cy", "58"); curl2.setAttribute("r", "9"); curl2.setAttribute("fill", "#D6A2F0");
+            svg.appendChild(curl2);
+            // грустные глаза
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "36"); eyeL.setAttribute("cy", "47"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "64"); eyeR.setAttribute("cy", "47"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "38"); pupilL.setAttribute("cy", "49"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "black");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "66"); pupilR.setAttribute("cy", "49"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "black");
+            svg.appendChild(pupilR);
+            return svg;
+        }
+        
+        function createLosyashSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#C2822F"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // рога ветвистые
+            const antlerL = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            antlerL.setAttribute("d", "M 35 27 L 22 16 L 27 8 L 35 15 L 42 10"); antlerL.setAttribute("fill", "#B57439"); antlerL.setAttribute("stroke", "#8B4E1C");
+            svg.appendChild(antlerL);
+            const antlerR = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            antlerR.setAttribute("d", "M 65 27 L 78 16 L 73 8 L 65 15 L 58 10"); antlerR.setAttribute("fill", "#B57439"); antlerR.setAttribute("stroke", "#8B4E1C");
+            svg.appendChild(antlerR);
+            // очки
+            const glassL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            glassL.setAttribute("cx", "35"); glassL.setAttribute("cy", "48"); glassL.setAttribute("r", "9"); glassL.setAttribute("fill", "#E9F2FF"); glassL.setAttribute("stroke", "#3A2A1A"); glassL.setAttribute("stroke-width", "2");
+            svg.appendChild(glassL);
+            const glassR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            glassR.setAttribute("cx", "65"); glassR.setAttribute("cy", "48"); glassR.setAttribute("r", "9"); glassR.setAttribute("fill", "#E9F2FF"); glassR.setAttribute("stroke", "#3A2A1A"); glassR.setAttribute("stroke-width", "2");
+            svg.appendChild(glassR);
+            const bridge = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            bridge.setAttribute("x1", "44"); bridge.setAttribute("y1", "48"); bridge.setAttribute("x2", "56"); bridge.setAttribute("y2", "48"); bridge.setAttribute("stroke", "#3A2A1A"); bridge.setAttribute("stroke-width", "2");
+            svg.appendChild(bridge);
+            const noseBig = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            noseBig.setAttribute("cx", "50"); noseBig.setAttribute("cy", "66"); noseBig.setAttribute("rx", "8"); noseBig.setAttribute("ry", "6"); noseBig.setAttribute("fill", "#DF7A2A");
+            svg.appendChild(noseBig);
+            return svg;
+        }
+        
+        function createSovunyaSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#AA6BC2"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // шапочка-чепчик
+            const cap = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            cap.setAttribute("d", "M 30 20 Q 50 8 70 20 L 68 30 Q 50 20 32 30 Z"); cap.setAttribute("fill", "#9B59B6");
+            svg.appendChild(cap);
+            // клюв
+            const beak = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            beak.setAttribute("points", "45,60 55,60 50,70"); beak.setAttribute("fill", "#F39C12");
+            svg.appendChild(beak);
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "34"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "8"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "66"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "8"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "36"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "4"); pupilL.setAttribute("fill", "#1F1A24");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "68"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "4"); pupilR.setAttribute("fill", "#1F1A24");
+            svg.appendChild(pupilR);
+            return svg;
+        }
+        
+        function createKopatychSVG(color, accent) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50"); circle.setAttribute("r", "46");
+            circle.setAttribute("fill", color); circle.setAttribute("stroke", "#B5651E"); circle.setAttribute("stroke-width", "2");
+            svg.appendChild(circle);
+            // шляпа
+            const hat = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            hat.setAttribute("cx", "50"); hat.setAttribute("cy", "24"); hat.setAttribute("rx", "27"); hat.setAttribute("ry", "12"); hat.setAttribute("fill", "#7D3C1A");
+            svg.appendChild(hat);
+            const hatTop = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            hatTop.setAttribute("x", "38"); hatTop.setAttribute("y", "12"); hatTop.setAttribute("width", "24"); hatTop.setAttribute("height", "14"); hatTop.setAttribute("fill", "#7D3C1A"); hatTop.setAttribute("rx", "4");
+            svg.appendChild(hatTop);
+            // глаза добрые
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", "35"); eyeL.setAttribute("cy", "48"); eyeL.setAttribute("r", "6"); eyeL.setAttribute("fill", "white");
+            svg.appendChild(eyeL);
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", "65"); eyeR.setAttribute("cy", "48"); eyeR.setAttribute("r", "6"); eyeR.setAttribute("fill", "white");
+            svg.appendChild(eyeR);
+            const pupilL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilL.setAttribute("cx", "37"); pupilL.setAttribute("cy", "48"); pupilL.setAttribute("r", "3"); pupilL.setAttribute("fill", "#231F1B");
+            svg.appendChild(pupilL);
+            const pupilR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pupilR.setAttribute("cx", "67"); pupilR.setAttribute("cy", "48"); pupilR.setAttribute("r", "3"); pupilR.setAttribute("fill", "#231F1B");
+            svg.appendChild(pupilR);
+            const nosePotato = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            nosePotato.setAttribute("cx", "50"); nosePotato.setAttribute("cy", "64"); nosePotato.setAttribute("rx", "7"); nosePotato.setAttribute("ry", "6"); nosePotato.setAttribute("fill", "#A55D35");
+            svg.appendChild(nosePotato);
+            return svg;
+        }
+        
+        const creators = [createKroshSVG, createNyushaSVG, createBarashSVG, createLosyashSVG, createSovunyaSVG, createKopatychSVG];
+        
+        // генерация лепестков
+        function buildSpinner() {
+            spinnerElem.innerHTML = ''; // очищаем (но центральный элемент потом добавим)
+            for (let i = 0; i < petalCount; i++) {
+                const petalDiv = document.createElement('div');
+                petalDiv.classList.add('petal');
+                const char = characters[i];
+                const svgElement = creators[i](char.color, char.accent);
+                petalDiv.appendChild(svgElement);
+                spinnerElem.appendChild(petalDiv);
+            }
+            // добавить центральный элемент обратно
+            const centerDiv = document.createElement('div');
+            centerDiv.classList.add('spinner-center');
+            centerDiv.innerHTML = '<span>⚡ КРУТИ!</span>';
+            spinnerElem.appendChild(centerDiv);
+            // пересчитать позиции
+            updatePetalsPosition();
+        }
+        
+        // анимация переключения
+        let isSpinning = false;
+        function toggleSpin() {
+            if (isSpinning) {
+                spinnerElem.classList.remove('spinning');
+                spinBtn.innerHTML = "🌀 КРУТИТЬ! 🌀";
+                spinBtn.style.background = "linear-gradient(135deg, #ffcf6e, #ffa843)";
+                isSpinning = false;
+            } else {
+                spinnerElem.classList.add('spinning');
+                spinBtn.innerHTML = "⏹️ СТОП! ⏹️";
+                spinBtn.style.background = "linear-gradient(135deg, #ff9f4a, #e07c2c)";
+                isSpinning = true;
+            }
+        }
+        
+        // обработчик resize - пересчет позиций лепестков при изменении размера окна (адаптив)
+        window.addEventListener('resize', () => {
+            if (spinnerElem) updatePetalsPosition();
+        });
+        
+        // инициализация
+        buildSpinner();
+        spinBtn.addEventListener('click', toggleSpin);
+        
+        // дополнительно, чтобы при первом рендере позиции были точными, и если картинка подгрузилась
+        setTimeout(() => {
+            updatePetalsPosition();
+        }, 100);
+    })();
+</script>
+</body>
+</html>
